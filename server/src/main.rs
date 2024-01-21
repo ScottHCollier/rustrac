@@ -15,9 +15,28 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{fmt::Display, time::SystemTime};
 use tower_http::{services::{ServeDir, ServeFile}, cors::CorsLayer};
+use url::Url;
+
+use crate::config::Config;
+
+mod config;
+mod errors;
 
 #[tokio::main]
 async fn main() {
+    let config: Config = Config::from_env();
+
+    let db = libsql_client::Client::from_config(libsql_client::Config {
+        url: Url::parse(&config.db_url).unwrap(),
+        auth_token: config.db_token,
+      })
+      .await
+      .unwrap();
+      
+    // let result = db.execute("SELECT * FROM example_users").await;
+
+    // println!("{:?}", result);
+
     // initialize tracing
     tracing_subscriber::fmt::init();
 
